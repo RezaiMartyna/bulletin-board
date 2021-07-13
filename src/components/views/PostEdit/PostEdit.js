@@ -23,7 +23,6 @@ const Component = ({className, isLogged}) => {
           <TextField className={styles.formField} required id="title" label="title" />
           <TextField className={styles.formField} required id="price" label="price" type="number" />
           <TextField className={styles.content} required id="content" label="content" multiline rows="10" variant="outlined" />
-          <TextField className={styles.formField} required id="email" type="email" label="email" />
           <TextField className={styles.formField} required id="telephone" type="number" label="telephone number" />
     
           <input accept="image/*" id="icon-button-file" type="file" />

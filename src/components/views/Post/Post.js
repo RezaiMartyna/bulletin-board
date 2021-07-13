@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -12,64 +12,80 @@ import CardActions from '@material-ui/core/CardActions';
 import clsx from 'clsx';
 
 import { connect } from 'react-redux';
-import { getAll } from '../../../redux/postsRedux.js';
+import { getPostById, fetchSinglePost } from '../../../redux/postsRedux.js';
 import { isLogged } from '../../../redux/authRedux';
 
 import styles from './Post.module.scss';
 
-const Component = ({ className, posts, match, isLogged }) => (
-  <div className={clsx(className, styles.root)}>
 
-    <div className={styles.card}>
-      <Card key={posts[match.params.id - 1].id} variant="outlined">
-        <CardActionArea>
-          <CardMedia
-            component="img"
-            alt="picture"
-            height="140"
-            image={posts[match.params.id - 1].image}
-            title="picture"
-            className={styles.cardMedia}
-          />
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              {posts[match.params.id - 1].title}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" component="p">
-              {posts[match.params.id - 1].content}
-            </Typography>
-            <Typography variant="body1" color="textPrimary" component="p">
-              {`price: $${posts[match.params.id - 1].price}`}
-            </Typography>
-            <Typography variant="body1" color="textPrimary" component="p">
-              {`email: ${posts[match.params.id - 1].email}`}
-            </Typography>
-            <Typography variant="body1" color="textPrimary" component="p">
-              {`telephone: ${posts[match.params.id - 1].telephone}`}
-            </Typography>
-            <Typography variant="body1" color="textPrimary" component="p">
-              {`date of published: ${posts[match.params.id - 1].date}`}
-            </Typography>
-          </CardContent>
-        </CardActionArea>
+const Component = ({ className, post, match, isLogged, fetchSinglePost }) => {
 
-        {isLogged &&
+  useEffect(() => {
+    fetchSinglePost(match.params.id);
+  }, []);
 
-        <CardActions>
-          <Button size="small" color="primary" href={`/post/${posts[match.params.id - 1].id}/edit`}>
-            Edit
-          </Button>
-        </CardActions>
-        }
-      </Card>
-    </div>
-  </div>
-);
+  if (post) {
+
+    return (
+      <div className={clsx(className, styles.root)}>
+
+        <div className={styles.card}>
+          <Card key={post._id} variant="outlined">
+            <CardActionArea>
+              <CardMedia
+                component="img"
+                alt="picture"
+                height="140"
+                image={post.photo}
+                title="picture"
+                className={styles.cardMedia}
+              />
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="h2">
+                  {post.title}
+                </Typography>
+                <Typography variant="body2" color="textSecondary" component="p">
+                  {post.content}
+                </Typography>
+                <Typography variant="body1" color="textPrimary" component="p">
+                  {`price: $${post.price}`}
+                </Typography>
+                <Typography variant="body1" color="textPrimary" component="p">
+                  {`telephone: ${post.phone}`}
+                </Typography>
+                <Typography variant="body1" color="textPrimary" component="p">
+                  {`date of published: ${post.date}`}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+
+            {isLogged &&
+
+              <CardActions>
+                <Button size="small" color="primary" href={`/post/${post._id}/edit`}>
+                  Edit
+                </Button>
+              </CardActions>
+            }
+          </Card>
+        </div>
+      </div>
+    );
+  }
+  else {
+    return (
+      <div>
+        Loading....
+      </div>
+    );
+  }
+};
 
 Component.propTypes = {
   className: PropTypes.string,
-  posts: PropTypes.array,
+  post: PropTypes.array,
   isLogged: PropTypes.bool,
+  fetchSinglePost: PropTypes.func,
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.number,
@@ -77,17 +93,16 @@ Component.propTypes = {
   }),
 };
 
-const mapStateToProps = state => ({
-  posts: getAll(state),
+const mapStateToProps = (state, props) => ({
   isLogged: isLogged(state),
-
+  post: getPostById(state, props.match.params.id),
 });
 
-// const mapDispatchToProps = dispatch => ({
-//   someAction: arg => dispatch(reduxActionCreator(arg)),
-// });
+const mapDispatchToProps = dispatch => ({
+  fetchSinglePost: postId => dispatch(fetchSinglePost(postId)),
+});
 
-const Container = connect(mapStateToProps)(Component);
+const Container = connect(mapStateToProps, mapDispatchToProps)(Component);
 
 export {
   //Component as Post,
